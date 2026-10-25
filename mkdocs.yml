@@ -1,0 +1,116 @@
+# tacplus.dev. Build with `just site` (output in build/), preview with
+# `just serve`.
+site_name: tacplus
+site_url: https://tacplus.dev/
+site_description: >-
+  tacplus is an open-source fleet: describe services in annotated Protocol
+  Buffers, generate them in Go, Rust or Java, and run them as a tenant-isolated
+  fleet on Kubernetes.
+site_author: Jody Scott
+copyright: Copyright &copy; 2026 Jody Scott &middot; Apache License 2.0
+repo_url: https://github.com/tacplus-dev
+repo_name: tacplus-dev
+edit_uri: ""
+
+docs_dir: docs
+site_dir: build
+strict: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  language: en
+  favicon: assets/favicon.svg
+  icon:
+    logo: material/code-braces
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+
+extra_css:
+  - assets/extra.css
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tacplus-dev
+      name: tacplus on GitHub
+
+plugins:
+  - search
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Why tacplus: why.md
+  - How a fleet works: how.md
+  - The pieces: pieces.md
+  - Run a fleet: run.md
+  - Build a service: build.md
+  - Replace a piece: replace.md
+  - Project: project.md
