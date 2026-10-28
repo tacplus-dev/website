@@ -4,6 +4,9 @@
 site: venv
   .venv/bin/mkdocs build --strict
 
+# The repository's gates, as the build pipeline runs them: a strict site build.
+gates: site
+
 serve: venv
   .venv/bin/mkdocs serve --strict
 
