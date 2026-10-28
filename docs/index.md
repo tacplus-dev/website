@@ -23,6 +23,7 @@ of it is Apache-2.0.
 
 [Run a fleet](run.md){ .md-button .md-button--primary }
 [Build a service](build.md){ .md-button }
+[What it does](features.md){ .md-button }
 [Why tacplus](why.md){ .md-button }
 [GitHub](https://github.com/tacplus-dev){ .md-button }
 

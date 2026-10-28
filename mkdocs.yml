@@ -108,6 +108,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Why tacplus: why.md
+  - What it does: features.md
   - How a fleet works: how.md
   - The pieces: pieces.md
   - Run a fleet: run.md
