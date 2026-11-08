@@ -1,0 +1,6 @@
+# The build image of tacplus-dev/website, by digest (#2; looper#71, looper#84): tacplus build 2.6 at v2.6.1's
+# digest, the image tacplus-dev/cluster and tacplus-dev/cloud pin, in which this repository's gates (`just gates`, a
+# strict MkDocs build: python3 and just, no Docker) run unchanged. The site has no CI image of its own (its GitHub
+# workflow builds on ubuntu-latest), so it takes the fleet's. It is no tacplus project, so it has no tacplus.lock; the
+# build pipeline reads this pin the way it reads one. A new digest is a change like any other, landed on the full gates.
+build_image: ghcr.io/tacplus-dev/tacplus/build:2.6.1@sha256:91f42995e0e3d6f959a7f75177caf94b2aded90fc36c8492dbcd320ca0d187f5
