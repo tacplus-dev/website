@@ -29,6 +29,9 @@ the looper then marks it `promoted` or `declined` here with the date.
   `actions/checkout@v4`, `setup-python@v5`, `upload-pages-artifact@v4`, `deploy-pages@v4` and
   `planning-files.yml`'s `tacplus-dev/looper/...@main` would become `@<sha>  # vN` pins the same way the fleets pin
   images by digest (build.lock). Small, mechanical, but a policy for the fleet's non-tacplus repositories, so for
-  Jody to set rather than one repository to adopt alone.
+  Jody to set rather than one repository to adopt alone. The build pipeline's security checks (tacplus-dev/website#2,
+  first run 2026-11-15) report the four action tags as Semgrep `github-actions-mutable-action-tag`, MEDIUM, each with
+  a fix: not failing the policy (HIGH/CRITICAL), so the build is green, and they are not baselined
+  (no `security-baseline.json`) so they stay visible in every report until this is decided.
 
 ## Promoted / declined
