@@ -21,5 +21,14 @@ the looper then marks it `promoted` or `declined` here with the date.
   pinned one, the looper (nightly scan or a build-pin job) opens the `approved` move itself, or a `just`-callable check
   in the gates reports the lag. Belongs with the platform's "Automatic security remediation" (ROADMAP.md Later) and
   tacplus-dev/looper, not here; recorded so the pattern is not lost.
+- **Pin the site's toolchain by hash and the workflows' actions by commit** (2026-11-15, nightly scan):
+  requirements.txt pins every package by version only, so `pip install -r requirements.txt` (the `venv` recipe,
+  `.github/workflows/site.yml`) trusts PyPI to serve the same wheel each time; pip-audit's own warning each run is
+  "users are encouraged to fully hash their pinned dependencies". `pip-compile --generate-hashes` (or
+  `pip freeze` plus `pip hash`) gives a requirements.txt pip verifies with `--require-hashes`, and site.yml's
+  `actions/checkout@v4`, `setup-python@v5`, `upload-pages-artifact@v4`, `deploy-pages@v4` and
+  `planning-files.yml`'s `tacplus-dev/looper/...@main` would become `@<sha>  # vN` pins the same way the fleets pin
+  images by digest (build.lock). Small, mechanical, but a policy for the fleet's non-tacplus repositories, so for
+  Jody to set rather than one repository to adopt alone.
 
 ## Promoted / declined
