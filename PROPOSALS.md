@@ -20,7 +20,8 @@ the looper then marks it `promoted` or `declined` here with the date.
   `build.lock` of a non-tacplus repository is moved by hand. Proposal: when `build:2.6`'s digest on ghcr moves off the
   pinned one, the looper (nightly scan or a build-pin job) opens the `approved` move itself, or a `just`-callable check
   in the gates reports the lag. Belongs with the platform's "Automatic security remediation" (ROADMAP.md Later) and
-  tacplus-dev/looper, not here; recorded so the pattern is not lost.
+  tacplus-dev/looper, not here; recorded so the pattern is not lost. It recurred at once: v2.6.13 shipped 40 minutes
+  after the move to 2.6.12, and the next nightly scan found the pin behind again (2026-11-16, tacplus-dev/website#4).
 - **Pin the site's toolchain by hash and the workflows' actions by commit** (2026-11-15, nightly scan):
   requirements.txt pins every package by version only, so `pip install -r requirements.txt` (the `venv` recipe,
   `.github/workflows/site.yml`) trusts PyPI to serve the same wheel each time; pip-audit's own warning each run is
