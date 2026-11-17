@@ -22,6 +22,12 @@ the looper then marks it `promoted` or `declined` here with the date.
   in the gates reports the lag. Belongs with the platform's "Automatic security remediation" (ROADMAP.md Later) and
   tacplus-dev/looper, not here; recorded so the pattern is not lost. It recurred at once: v2.6.13 shipped 40 minutes
   after the move to 2.6.12, and the next nightly scan found the pin behind again (2026-11-16, tacplus-dev/website#4).
+  The design has to say which of two things the pin follows. On 2026-11-16 15:18Z, ghcr's `build:2.6` moved to
+  `sha256:a9f20d48…` (tag `20261116-2ffaddd`), a rebuild of v2.6.13's own source (tacplus-dev/tacplus 2ffaddd) with
+  no new release. The `2.6.13` tag stays on the pinned `sha256:0387c7dc…`. So "the line's latest patch" and "what
+  `build:2.6` resolves to", which build.lock's header treats as the same thing, now differ (nightly scan 2026-11-17).
+  A job that follows the floating tag would open a move each time it is rebuilt. One that follows release tags would
+  miss base-image rebuilds that carry no release.
 - **Pin the site's toolchain by hash and the workflows' actions by commit** (2026-11-15, nightly scan):
   requirements.txt pins every package by version only, so `pip install -r requirements.txt` (the `venv` recipe,
   `.github/workflows/site.yml`) trusts PyPI to serve the same wheel each time; pip-audit's own warning each run is
