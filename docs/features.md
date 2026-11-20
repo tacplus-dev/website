@@ -74,9 +74,8 @@ service presents its projected service-account token to the kernel, which
 verifies it with the Kubernetes TokenReview API, maps namespace and account to
 a registered delegate, and mints its tokens. The generated ServiceManager does
 this, refreshes, and exchanges for audience-scoped tokens per target. The
-kernel itself bootstraps the same way from
-[kmaker](https://github.com/tacplus-dev/kmaker), a small CA that runs before
-it.
+kernel's own certificate comes from the deploy: the operator signs it under
+the cluster CA, and nothing in the running fleet signs one.
 
 **SPIFFE identities with a fixed layout.** Shared services under `/system`,
 tenant instances and tenant users under `/tenants/<tenant>`, users that exist
@@ -185,10 +184,15 @@ from it, against its own merged protos, so the operator knows exactly the
 services its fleet runs. It renders a per-tenant instance of every
 tenant-owned service from the kernel's tenant records.
 
-**Public certificates from inside the cluster.**
-[letsencrypt](https://github.com/tacplus-dev/letsencrypt) runs the ACME
-exchange in-cluster and keeps the one durable copy as a record, so a fleet is
-a real OIDC issuer outside systems can trust.
+**Configuration and certificates from the pipeline.** A deployment deploys
+from a pipeline, and all of the system's configuration comes from it,
+including the public certificate. The pipeline obtains or renews the
+certificate as one of its steps, from Let's Encrypt or anyone else, and the
+gateway swaps in a new one without a restart; the fleet runs no certificate
+service, yet it is a real OIDC issuer outside systems can trust. Tenant
+configuration is durable state held in the deployment. Ideally a tenant
+manages it with a pipeline too, but that is not required, because not every
+tenant is technical.
 
 **Versioning you can pin without reading the notes.** A patch is fixes only.
 Features come on a minor. Consumers pin `MAJOR.MINOR`, images carry the

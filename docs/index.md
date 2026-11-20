@@ -88,9 +88,10 @@ decides. A nightly security sweep covers every release line.
 
     ---
 
-    Kernel, gateway, eventbus, stratum, opa, oauth, letsencrypt, kmaker, the
-    operator library and llmproxy: the services every fleet needs, each in its
-    own repository with its own README.
+    Kernel, gateway, eventbus, stratum, opa, oauth, the operator library and
+    llmproxy: the services every fleet needs, each in its own repository with
+    its own README. None of them obtains the fleet's configuration or its
+    certificate: both come from the deployment's pipeline.
 
     [:octicons-arrow-right-24: The pieces](pieces.md)
 
@@ -129,13 +130,20 @@ flowchart LR
   svc --> bus[eventbus]
   bus --> stratum[stratum<br/>record store]
   svc --> llm[llmproxy]
-  kmaker[kmaker] -. signs .-> kernel
-  le[letsencrypt] -. cert .-> gw
+  pipe[[deployment pipeline]] -. config and certificate .-> kernel
 ```
 
-Every arrow is a generated client calling a generated server, authenticated
-with a token kernel minted and authorized by the annotations in the proto.
-[How a fleet works](how.md) follows a call through it.
+Every solid arrow is a generated client calling a generated server,
+authenticated with a token kernel minted and authorized by the annotations in
+the proto. [How a fleet works](how.md) follows a call through it.
+
+**A deployment deploys from a pipeline.** tacplus is opinionated about this.
+All of the system's configuration comes from the deployment's pipeline,
+including the public certificate: the pipeline may obtain it as one of its
+steps, but the running fleet never obtains one itself. Tenant configuration is
+different: it is durable state held in the deployment. Ideally a tenant
+manages its configuration with a pipeline too, but that is not required, since
+not every tenant is technical.
 
 ## Where the detail lives
 

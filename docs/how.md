@@ -5,22 +5,20 @@ description: How a tacplus fleet works, hop by hop. Identity and tokens, routing
 # How a fleet works
 
 A fleet is a set of generated services running together on one Kubernetes
-cluster under one trust domain. This page follows the four things every fleet
-does: give each service an identity, route a call, keep state, and come up
-from nothing. The repositories named here are described in
-[The pieces](pieces.md).
+cluster under one trust domain, deployed from a pipeline. This page follows the
+four things every fleet does: give each service an identity, route a call,
+keep state, and come up from nothing. The repositories named here are
+described in [The pieces](pieces.md).
 
 ```mermaid
 flowchart TB
   subgraph edge [Edge]
     gw[gateway]
-    le[letsencrypt]
     oauth[oauth]
   end
   subgraph control [Control plane]
     kernel[kernel]
     opa[opa]
-    kmaker[kmaker]
   end
   subgraph data [Data plane]
     bus[eventbus]
@@ -43,8 +41,8 @@ flowchart TB
   b --> bus
   bus --> stratum
   a --> blob
-  kmaker -. signs kernel's cert .-> kernel
-  le -. public cert .-> gw
+  pipe[[deployment pipeline]] -. system config, certificate .-> kernel
+  kernel -. gateway config, certificate .-> gw
 ```
 
 ## 1. Identity and tokens
@@ -73,11 +71,11 @@ refresh token and an access token. When the service needs to call another
 service, it exchanges the refresh token for an access token with that
 service's audience. All of this is generated; the handler never sees a token.
 
-**The kernel itself bootstraps from kmaker.** Before the kernel can mint
-anything it needs a certificate. kmaker is a small CA that verifies the kernel
-pod's service-account token and signs its certificate under the cluster
-signing CA the operator provisioned. kmaker deliberately starts outside the
-normal kernel-backed path, because it is what the kernel needs first.
+**The kernel's own certificate comes from the deploy.** Before the kernel can
+mint anything it needs a certificate. The operator signs it under the cluster
+CA when it renders the deployment, from PKI material the pipeline keeps, and
+delivers it as part of the kernel's configuration. Nothing in the running
+fleet signs a kernel certificate.
 
 **Users come in through oauth.** oauth is the only service that validates
 tokens not issued by the kernel. It brokers the login with the identity
@@ -118,10 +116,13 @@ at its own door. [tenantecho](https://github.com/tacplus-dev/tenantecho) exists
 to prove this: its reply names the tenant that served it and the tenant that
 called, and a mismatch is visible in the response.
 
-**letsencrypt gives the gateway its public certificate.** It runs the ACME
-exchange inside the cluster, keeps the one durable copy of the certificate as
-a record in stratum, and mirrors the live copy into kernel state, which the
-gateway watches.
+**The public certificate arrives with the configuration.** The fleet does not
+obtain certificates. The deployment's pipeline checks the certificate on every
+run and, when it is missing or due for renewal, obtains a new one as a step of
+its own (from Let's Encrypt over DNS-01, say, or one signed by someone else).
+The certificate is part of the gateway's configuration in the system config
+the pipeline deploys. The kernel delivers a new config through its refresh,
+and every gateway swaps the certificate without a restart.
 
 ## 3. State
 
@@ -130,9 +131,8 @@ each piece of its state is.
 
 **Live state is hosted in the kernel.** A state root labelled `kernel` lives in
 the kernel's in-memory cluster, behind generated get, set and watch services.
-Service configuration, service health, the policy state opa reads, the
-certificate the gateway serves: all of it is here, and every reader watches
-rather than polls. The kernel holds no user data and does no durability beyond
+Service configuration, service health, the policy state opa reads: all of it
+is here, and every reader watches rather than polls. The kernel holds no user data and does no durability beyond
 its own identity snapshot and lock log. It is the fleet's working memory, not
 its disk.
 
@@ -150,6 +150,16 @@ generated, authenticated call.
 **Bytes go to the blob store.** Content-addressed, mirrored across two pods
 with their own volumes, uploaded and fetched over paths the gateway proxies,
 with the metadata kept as stratum records.
+
+**System config comes from the pipeline; tenant config is state.** The
+deployment's configuration, every service's settings, pins, trust material
+and certificate, comes only from the deployment's pipeline. It is held in
+kernel state, and nothing in the platform can write it: a change is a new
+config the pipeline deploys. A tenant's configuration is the other way round.
+It is durable state held in the deployment, in that tenant's own kernel state
+and its own stratum, and it changes through typed, authorized writes, each a
+new version. Ideally a tenant manages it with a pipeline too, but that is not
+required, because not every tenant is technical.
 
 ## 4. Standing up a cluster
 
@@ -175,9 +185,11 @@ optional services and root credential pairs, and a `crypto.yaml` with the PKI
 material that is never committed. It reads the kernel's tenant records and
 renders a per-tenant instance of every tenant-owned service.
 
-**The boot order follows the identity story.** kmaker comes up and signs the
-kernel's certificate. The kernel comes up and starts hosting state and every
-service's configuration. Every other service bootstraps through its generated
+**The pipeline deploys; the boot order follows the identity story.** The
+deployment's pipeline obtains or renews the public certificate if it is due,
+and hands the operator the configuration, certificate included, to apply. The
+kernel comes up with the certificate the operator signed for it and starts
+hosting state and every service's configuration. Every other service bootstraps through its generated
 ServiceManager against the kernel, obtains its tokens and TLS, and registers
 its health. The gateway watches that health and starts routing.
 

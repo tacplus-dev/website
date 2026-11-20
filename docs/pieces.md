@@ -20,10 +20,9 @@ what each is for and how they fit. Ids are from the
 
 | Repository | Language | Id | What it is | Depends on |
 |---|---|---|---|---|
-| [kernel](https://github.com/tacplus-dev/kernel) | Java | 8 | The fleet's state host and sole token and certificate authority. Hosts every `kernel`-labelled state root and every service's configuration. Mints every token: service, user, client, workload, external. Shared; one per fleet. | opa, kmaker |
-| [kmaker](https://github.com/tacplus-dev/kmaker) | Go | 49 | The bootstrap CA. Verifies a kernel pod's Kubernetes service-account token and signs its certificate under the cluster signing CA. Starts before the kernel, on purpose. | none |
+| [kernel](https://github.com/tacplus-dev/kernel) | Java | 8 | The fleet's state host and sole token and certificate authority. Hosts every `kernel`-labelled state root and every service's configuration. Mints every token: service, user, client, workload, external. Shared; one per fleet. | opa, oauth |
 | [opa](https://github.com/tacplus-dev/opa) | Go | 29 | The policy evaluator. The kernel calls it to turn identity-provider claims into token entitlements and to evaluate proxy policy. Only the kernel talks to it directly. | none |
-| [operator](https://github.com/tacplus-dev/operator) | Go | 47 | A library a deployment repository builds its own operator from. Renders Helm charts for every service from `operator.yaml` and `crypto.yaml`, provisions the PKI, and renders per-tenant instances of tenant-owned services. | kernel, oauth, kmaker, gateway, eventbus, opa, letsencrypt, llmproxy |
+| [operator](https://github.com/tacplus-dev/operator) | Go | 47 | A library a deployment repository builds its own operator from. Renders Helm charts for every service from `operator.yaml` and `crypto.yaml`, provisions the PKI, signs the kernel's own certificate at deploy time, and renders per-tenant instances of tenant-owned services. | kernel, oauth, gateway, eventbus, opa, stratum, llmproxy |
 
 ## Data plane
 
@@ -37,9 +36,8 @@ what each is for and how they fit. Ids are from the
 
 | Repository | Language | Id | What it is | Depends on |
 |---|---|---|---|---|
-| [gateway](https://github.com/tacplus-dev/gateway) | Rust | 7 | The edge. Terminates TLS, proxies REST and gRPC, validates every message, checks every token, routes to healthy instances from the kernel's health state, and routes tenant-owned services by the caller's tenant. Also serves the web app. | kernel (state), letsencrypt, blobstore |
+| [gateway](https://github.com/tacplus-dev/gateway) | Rust | 7 | The edge. Terminates TLS with the certificate its configuration carries, hot-swapped on renewal, proxies REST and gRPC, validates every message, checks every token, routes to healthy instances from the kernel's health state, and routes tenant-owned services by the caller's tenant. Also serves the web app. | kernel (state), blobstore |
 | [oauth](https://github.com/tacplus-dev/oauth) | Rust | 21 | The login broker. Verifies identity-provider tokens and asks the kernel to mint the user's token; brokers CLI and device logins. Holds no signing keys. | kernel |
-| [letsencrypt](https://github.com/tacplus-dev/letsencrypt) | Go | 9 | Obtains and renews the fleet's public certificate over ACME inside the cluster. The durable copy is a stratum record, the live copy is kernel state the gateway watches. | kernel, eventbus, stratum |
 
 ## Model egress
 
@@ -72,5 +70,11 @@ The platform services were copied out of a private tree on 2026-10-23 and are
 being reworked in the open; the private copy keeps running its own fleet and
 the two are not kept in sync. Expect module paths, headers and some READMEs to
 still be catching up. Each README's provenance section says what changed and
-what is next. Open issues and the review of every feature request are on each
+what is next. Two have since been retired and archived:
+[kmaker](https://github.com/tacplus-dev/kmaker), the bootstrap CA that once
+signed the kernel's certificate, and
+[letsencrypt](https://github.com/tacplus-dev/letsencrypt), which once obtained
+the public certificate inside the cluster. The operator now signs the kernel's
+certificate at deploy time, and the deployment's pipeline obtains the public
+certificate. Open issues and the review of every feature request are on each
 repository's issue tracker.
