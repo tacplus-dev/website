@@ -10,3 +10,4 @@ Append-only: add entries at the end, never edit or remove one (CI enforces it). 
 - 2026-11-20 looper issue Site is dated: kmaker (archived) still listed, letsencrypt drawn as a fleet service; say config and cert come from the pipeline (#5)
 - 2026-11-23 looper issue Pinned images behind their lines: relock (build.lock: ghcr.io/tacplus-dev/tacplus/build:2.6.13 → ghcr.io/tacplus-dev/tacplus/build:2.6.14) (#7)
 - 2026-11-27 looper issue Pinned images behind their lines: relock (build.lock: ghcr.io/tacplus-dev/tacplus/build:20261123-57a6521 → ghcr.io/tacplus-dev/tacplus/build:20261126-57a6521) (#9)
+- 2026-11-28 looper issue build.lock's build:2.6.13 ships docker-buildx with containerd v2.4.1 (CVE-2026-95839, HIGH): move to v2.6.14 once tacplus#933 cuts it (#6)
